@@ -1,0 +1,16 @@
+@startmindmap
+* class diagram
+** class 1
+*** field 1
+*** field 2
+*** method 1
+*** method 2
+** class 2
+*** ...
+** relationship 1
+*** left class
+*** right class
+*** relationship type
+** relationship 2
+*** ...
+@endmindmap

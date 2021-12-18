@@ -1,15 +1,15 @@
 package nl.bjornvanderlaan.plantuml.dsl
 
-abstract class PlantUmlDsl {
-    protected val children = mutableListOf<PlantUmlDsl>()
+abstract class PlantUmlElement {
+    protected val children = mutableListOf<PlantUmlElement>()
 
-    protected fun <T: PlantUmlDsl> doInit(child: T) {
+    protected fun <T: PlantUmlElement> addChild(child: T) {
         children.add(child)
     }
 
-    protected fun <T: PlantUmlDsl> doInit(child: T, init: T.() -> Unit) {
+    protected fun <T: PlantUmlElement> addChild(child: T, init: T.() -> Unit) {
         child.init()
-        this.doInit(child)
+        this.addChild(child)
     }
 
     abstract override fun toString(): String
@@ -17,7 +17,7 @@ abstract class PlantUmlDsl {
 
 enum class AttributeVisibility { PUBLIC, PRIVATE, PROTECTED }
 
-abstract class Attribute(private val first: String, private val second: String? = null): PlantUmlDsl() {
+abstract class Attribute(private val first: String, private val second: String? = null): PlantUmlElement() {
     private var visibility: AttributeVisibility = AttributeVisibility.PUBLIC
 
     fun setVisibility(visibility: AttributeVisibility): Attribute {
@@ -45,7 +45,7 @@ class Method(private val name: String, private val returnType: String? = null): 
 
 enum class RelationshipType { EXTENSION, COMPOSITION, AGGREGATION, ASSOCIATION }
 
-class Relationship(private val left: String, private val right: String, private val type: RelationshipType, private val label: String? = null): PlantUmlDsl() {
+class Relationship(private val left: String, private val right: String, private val type: RelationshipType, private val label: String? = null): PlantUmlElement() {
     override fun toString() = "$left ${getArrow()} $right ${if (label != null) ": $label" else ""}"
 
     private fun getArrow() =
@@ -57,9 +57,9 @@ class Relationship(private val left: String, private val right: String, private 
         }
 }
 
-class Class(private val name: String, private val identifier: String): PlantUmlDsl() {
+class Class(private val name: String, private val identifier: String): PlantUmlElement() {
     private fun addAttributes(attributes: List<Attribute>, visibility: AttributeVisibility)
-        = attributes.forEach { doInit(it.setVisibility(visibility)) }
+        = attributes.forEach { addChild(it.setVisibility(visibility)) }
 
     fun public(vararg attributes: Attribute) = addAttributes(attributes.toList(), AttributeVisibility.PUBLIC)
     fun private(vararg attributes: Attribute) = addAttributes(attributes.toList(), AttributeVisibility.PRIVATE)
@@ -67,12 +67,12 @@ class Class(private val name: String, private val identifier: String): PlantUmlD
     override fun toString() = "class \"${this.name}\" as ${this.identifier} {\n\t${children.joinToString("\n\t")}\n}"
 }
 
-class ClassDiagram: PlantUmlDsl() {
+class ClassDiagram: PlantUmlElement() {
     fun clazz(name: String, identifier: String = name.replace(" ", ""), init: Class.() -> Unit) =
-        doInit(Class(name, identifier), init)
+        addChild(Class(name, identifier), init)
 
     fun relationship(left: String, right: String, type: RelationshipType, label: String? = null) =
-        doInit(Relationship(left, right, type, label))
+        addChild(Relationship(left, right, type, label))
 
     override fun toString() = "@startuml ldm\n\t${children.joinToString("\n\n")}\n@enduml"
 }

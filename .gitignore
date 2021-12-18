@@ -6,3 +6,6 @@ build
 
 # Ignore IntelliJ
 .idea
+
+# PlantUML export directory
+out

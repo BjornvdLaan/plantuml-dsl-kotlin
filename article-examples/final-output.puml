@@ -1,0 +1,45 @@
+@startuml ldm
+	class "Person" as Person {
+	+ id : Integer
+	+ getName() : String
+}
+
+class "Customer" as Customer {
+	+ id : Integer
+	+ emailAddress : String
+	+ getName() : String
+	+ getAccountBalance() : Integer
+	+ verifyPassword() : Boolean
+	- name : String
+	- password : String
+}
+
+class "Wallet" as Wallet {
+	+ id : Integer
+	+ customerId : Integer
+	+ getBalance() : Integer
+}
+
+class "Order" as Order {
+	+ id : Integer
+	+ customerId : Integer
+	+ place() : Integer
+	+ getTotalPrice() : Float
+}
+
+class "OrderItem" as OrderItem {
+	+ id : Integer
+	+ orderId : Integer
+	+ getDescription() : String
+	- description : String
+	- price : Float
+}
+
+Person <|-- Customer : extends
+
+Customer o-- Wallet : belongs to
+
+Order *-- OrderItem : is part of
+
+Order <-- Customer : places
+@enduml
